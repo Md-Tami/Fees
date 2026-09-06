@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>Student Fee Management - Mobile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #eef3f7;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: #1a2e44;
+            border-bottom: 2px solid #2a5a7a;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 i { color: #2a5a7a; }
+
+        /* FORM */
+        .form-section {
+            background: #f7faff;
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            border: 1px solid #dce6f0;
+        }
+        .form-section h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: #1f3a57;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #1f3a57;
+        }
+        .form-group label i {
+            margin-right: 4px;
+            color: #3d6a9b;
+            width: 16px;
+        }
+        .form-group input, .form-group select {
+            padding: 8px 10px;
+            border: 1.5px solid #cbd8e8;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            background: white;
+            transition: 0.2s;
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #2a5a7a;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42,90,122,0.12);
+        }
+        .btn-primary {
+            background: #1f3a57;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            background: #2a4f72;
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+        .btn-print {
+            background: #d4a017;
+            color: white;
+        }
+        .btn-print:hover {
+            background: #e6b422;
+        }
+        .btn-print:active {
+            transform: scale(0.97);
+        }
+
+        /* FILTER */
+        .class-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .class-filter label {
+            font-weight: 600;
+            color: #1f3a57;
+            font-size: 0.9rem;
+        }
+        .class-filter select {
+            padding: 8px 14px;
+            border-radius: 30px;
+            border: 1.5px solid #cbd8e8;
+            font-size: 0.9rem;
+            background: white;
+            font-weight: 500;
+            flex: 1;
+            min-width: 100px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .class-filter #studentCount {
+            font-size: 0.8rem;
+            color: #3a5a7a;
+            margin-left: auto;
+        }
+
+        /* STUDENT LIST */
+        .student-list-section {
+            background: #fafcff;
+            border-radius: 16px;
+            padding: 10px 0;
+            margin-bottom: 18px;
+            border: 1px solid #e2ecf5;
+        }
+        .student-list-header {
+            display: grid;
+            grid-template-columns: 25px 1.8fr 0.8fr 0.8fr 50px;
+            gap: 5px;
+            padding: 8px 12px;
+            background: #e5eef9;
+            border-radius: 12px;
+            margin: 0 8px 8px 8px;
+            font-weight: 700;
+            color: #1a2e44;
+            font-size: 0.7rem;
+        }
+        .student-list-header span:last-child { text-align: right; }
+        .student-list {
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 0 5px;
+        }
+        .student-list::-webkit-scrollbar { width: 4px; }
+        .student-list::-webkit-scrollbar-thumb { background: #b8cbdf; border-radius: 10px; }
+        .student-item {
+            display: grid;
+            grid-template-columns: 25px 1.8fr 0.8fr 0.8fr 50px;
+            gap: 5px;
+            padding: 8px 12px;
+            margin: 3px 3px;
+            border-radius: 10px;
+            background: white;
+            border: 1px solid #eaf1f9;
+            cursor: pointer;
+            transition: 0.15s;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+        .student-item:active {
+            transform: scale(0.98);
+        }
+        .student-item.active {
+            background: #d0e2f5;
+            border-color: #2a5a7a;
+            border-width: 2px;
+        }
+        .student-item .sname {
+            font-weight: 600;
+            color: #1a2e44;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .student-item .sclass {
+            background: #dce6f2;
+            padding: 1px 8px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            text-align: center;
+            font-weight: 600;
+            color: #1f3a57;
+        }
+        .student-item .sid {
+            color: #4a6a8a;
+            font-size: 0.65rem;
+        }
+        .student-item .sphone {
+            font-size: 0.7rem;
+            color: #3d5f7a;
+        }
+        .delete-icon {
+            color: #a13e3e;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+        .delete-icon:active {
+            transform: scale(1.2);
+        }
+
+        .empty-list {
+            text-align: center;
+            padding: 25px 15px;
+            color: #5a7a9a;
+            font-size: 0.95rem;
+        }
+
+        /* DETAIL PANEL */
+        .detail-panel {
+            background: #f8fbff;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid #dce6f0;
+            margin-top: 10px;
+        }
+        .detail-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px dashed #bed2e5;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+        }
+        .detail-header h2 {
+            font-size: 1.2rem;
+            color: #0f263b;
+        }
+        .detail-header .badge {
+            background: #1f3a57;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+        }
+        .detail-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+            background: #eaf2fc;
+            padding: 10px 14px;
+            border-radius: 14px;
+            margin-bottom: 15px;
+            font-size: 0.75rem;
+        }
+        .detail-info-grid span {
+            font-weight: 500;
+            color: #1a3a55;
+        }
+        .detail-info-grid i {
+            margin-right: 4px;
+            color: #3d6a9b;
+            width: 16px;
+        }
+
+        /* FEE TABLE - MOBILE */
+        .fee-table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #d2e0ed;
+            margin-top: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .fee-table-wrap table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            background: white;
+        }
+        .fee-table-wrap th {
+            background: #1f3a57;
+            color: white;
+            padding: 8px 6px;
+            text-align: center;
+            white-space: nowrap;
+            font-size: 0.7rem;
+        }
+        .fee-table-wrap td {
+            padding: 5px 4px;
+            text-align: center;
+            border-bottom: 1px solid #e8f0f8;
+            vertical-align: middle;
+        }
+        .fee-table-wrap tr:last-child td { border-bottom: none; }
+        .fee-table-wrap tr:hover td { background: #f4faff; }
+
+        .fee-table-wrap input, .fee-table-wrap select {
+            padding: 4px 6px;
+            border: 1.5px solid #cbd8e8;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            width: 100%;
+            max-width: 100px;
+            background: white;
+            transition: 0.2s;
+        }
+        .fee-table-wrap input:disabled, .fee-table-wrap select:disabled {
+            background: #f0f4f8;
+            color: #4a6a8a;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        .fee-table-wrap input:focus:not(:disabled), .fee-table-wrap select:focus:not(:disabled) {
+            border-color: #2a5a7a;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42,90,122,0.1);
+        }
+        .fee-table-wrap .fee-input { max-width: 80px; }
+        .fee-table-wrap .date-input { max-width: 100px; }
+        .fee-table-wrap .status-select { max-width: 100px; }
+        .fee-table-wrap .sign-input { max-width: 100px; }
+
+        .btn-sm {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            margin: 1px;
+            white-space: nowrap;
+        }
+        .btn-sm-success {
+            background: #1f7a4a;
+            color: white;
+        }
+        .btn-sm-success:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        .btn-sm-success:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-sm-warning {
+            background: #d4a017;
+            color: white;
+        }
+        .btn-sm-warning:active {
+            transform: scale(0.95);
+        }
+        .btn-sm-danger {
+            background: #a13e3e;
+            color: white;
+        }
+        .btn-sm-danger:active {
+            transform: scale(0.95);
+        }
+
+        .status-badge {
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.7rem;
+            display: inline-block;
+        }
+        .status-paid {
+            background: #d4edda;
+            color: #0f7b3a;
+        }
+        .status-unpaid {
+            background: #f8d7da;
+            color: #b13e3e;
+        }
+
+        .action-cell {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            justify-content: center;
+            align-items: center;
+        }
+        .lock-icon {
+            color: #1f7a4a;
+            font-size: 0.9rem;
+        }
+
+        .empty-detail {
+            text-align: center;
+            padding: 30px 15px;
+            color: #4a6a8a;
+        }
+        .empty-detail i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 10px;
+            color: #8aabca;
+        }
+
+        .footer-note {
+            margin-top: 12px;
+            font-size: 0.65rem;
+            color: #4a6a8a;
+            text-align: center;
+        }
+
+        .print-btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .print-btn-container .btn-primary {
+            flex: 1;
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .app-container {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 20px !important;
+                max-width: 100% !important;
+            }
+            .form-section,
+            .class-filter,
+            .student-list-section,
+            .print-btn-container,
+            .btn-primary,
+            .btn-print,
+            .btn-sm,
+            .delete-icon,
+            .action-cell .btn-sm-warning,
+            .action-cell .btn-sm-success,
+            .action-cell .lock-icon,
+            #addStudentBtn,
+            .footer-note {
+                display: none !important;
+            }
+            .detail-panel {
+                border: none !important;
+                padding: 0 !important;
+                background: white !important;
+            }
+            .detail-header {
+                border-bottom: 2px solid #1a2e44 !important;
+            }
+            .detail-info-grid {
+                background: #f5f8fc !important;
+                border: 1px solid #dce6f0 !important;
+            }
+            .fee-table-wrap {
+                border: 1px solid #1a2e44 !important;
+            }
+            .fee-table-wrap th {
+                background: #1a2e44 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .fee-table-wrap td {
+                border-bottom: 1px solid #dce6f0 !important;
+            }
+            .fee-table-wrap input,
+            .fee-table-wrap select {
+                border: none !important;
+                background: transparent !important;
+                padding: 2px !important;
+                max-width: 100% !important;
+                color: #1a2e44 !important;
+                font-weight: 600 !important;
+            }
+            .fee-table-wrap input:disabled,
+            .fee-table-wrap select:disabled {
+                opacity: 1 !important;
+                background: transparent !important;
+            }
+            .status-badge {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .detail-panel .detail-header .badge {
+                background: #1a2e44 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .empty-detail {
+                display: none !important;
+            }
+            .fee-table-wrap table {
+                min-width: 100% !important;
+                font-size: 0.8rem !important;
+            }
+            .fee-table-wrap td,
+            .fee-table-wrap th {
+                padding: 6px 8px !important;
+            }
+            .action-cell {
+                display: none !important;
+            }
+            .detail-header h2 {
+                font-size: 1.4rem !important;
+            }
+            .detail-info-grid {
+                font-size: 0.85rem !important;
+                padding: 12px 16px !important;
+            }
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 3px double #1a2e44;
+                padding-bottom: 10px;
+            }
+            .print-header h2 {
+                font-size: 1.8rem;
+                color: #1a2e44;
+            }
+            .print-header p {
+                color: #4a6a8a;
+                font-size: 0.9rem;
+            }
+            .print-footer {
+                display: block !important;
+                text-align: center;
+                margin-top: 20px;
+                padding-top: 10px;
+                border-top: 2px solid #dce6f0;
+                font-size: 0.7rem;
+                color: #4a6a8a;
+            }
+        }
+
+        /* Print header/footer - hidden by default, shown only in print */
+        .print-header, .print-footer {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .app-container { padding: 10px; }
+            .form-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .form-group input, .form-group select { font-size: 0.85rem; padding: 6px 8px; }
+            .form-section { padding: 12px; }
+            .detail-info-grid { grid-template-columns: 1fr 1fr; font-size: 0.7rem; padding: 8px 10px; }
+            .detail-header h2 { font-size: 1rem; }
+            .student-item { font-size: 0.7rem; padding: 6px 8px; }
+            .student-item .sname { font-size: 0.75rem; }
+            .fee-table-wrap table { min-width: 500px; font-size: 0.7rem; }
+            .fee-table-wrap th { font-size: 0.6rem; padding: 6px 4px; }
+            .fee-table-wrap td { padding: 4px 3px; }
+            .fee-table-wrap input, .fee-table-wrap select { font-size: 0.65rem; padding: 3px 4px; max-width: 70px; }
+            .fee-table-wrap .fee-input { max-width: 60px; }
+            .fee-table-wrap .date-input { max-width: 80px; }
+            .fee-table-wrap .status-select { max-width: 80px; }
+            .fee-table-wrap .sign-input { max-width: 80px; }
+            .btn-sm { font-size: 0.6rem; padding: 3px 6px; }
+            h1 { font-size: 1.2rem; }
+            .print-btn-container { flex-direction: column; }
+        }
+
+        @media (max-width: 380px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .detail-info-grid { grid-template-columns: 1fr; }
+            .student-list-header {
+                grid-template-columns: 20px 1.5fr 0.6fr 0.6fr 35px;
+                font-size: 0.6rem;
+            }
+            .student-item {
+                grid-template-columns: 20px 1.5fr 0.6fr 0.6fr 35px;
+                font-size: 0.65rem;
+                padding: 5px 6px;
+            }
+            .student-item .sclass { font-size: 0.6rem; padding: 1px 6px; }
+            .student-item .sid { font-size: 0.55rem; }
+            .fee-table-wrap table { min-width: 420px; }
+            .fee-table-wrap input, .fee-table-wrap select { max-width: 55px; font-size: 0.6rem; }
+            .fee-table-wrap .fee-input { max-width: 50px; }
+            .fee-table-wrap .date-input { max-width: 65px; }
+            .fee-table-wrap .status-select { max-width: 65px; }
+            .fee-table-wrap .sign-input { max-width: 65px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <h1><i class="fas fa-user-graduate"></i>Mithila Coaching Center Fee Management</h1>
+
+    <!-- FORM -->
+    <div class="form-section">
+        <h3><i class="fas fa-plus-circle"></i> Add New Student</h3>
+        <div class="form-grid">
+            <div class="form-group full-width">
+                <label><i class="fas fa-user"></i> Student Name *</label>
+                <input type="text" id="sName" placeholder="e.g. Rahul Kumar" />
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-chalkboard"></i> Class</label>
+                <select id="sClass">
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-user-father"></i> Father</label>
+                <input type="text" id="sFather" placeholder="Father's Name" />
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-user-mother"></i> Mother</label>
+                <input type="text" id="sMother" placeholder="Mother's Name" />
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-calendar-alt"></i> DOB</label>
+                <input type="date" id="sDob" />
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Mobile</label>
+                <input type="text" id="sPhone" placeholder="9876543210" />
+            </div>
+            <div class="form-group full-width">
+                <label><i class="fas fa-home"></i> Address</label>
+                <input type="text" id="sAddress" placeholder="Full Address" />
+            </div>
+            <div class="form-group full-width">
+                <button class="btn-primary" id="addStudentBtn"><i class="fas fa-save"></i> Add Student</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="class-filter">
+        <label><i class="fas fa-filter"></i> Class:</label>
+        <select id="classFilter">
+            <option value="all">All</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+        </select>
+        <span id="studentCount">Total: 0</span>
+    </div>
+
+    <!-- STUDENT LIST -->
+    <div class="student-list-section">
+        <div class="student-list-header">
+            <span>#</span>
+            <span>Name</span>
+            <span>Class</span>
+            <span>ID</span>
+            <span> </span>
+        </div>
+        <div class="student-list" id="studentList">
+            <div class="empty-list">No students. Add from above.</div>
+        </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel" id="detailPanel">
+        <div id="detailContent">
+            <div class="empty-detail">
+                <i class="fas fa-hand-pointer"></i>
+                Click on a student <br /> to enter fee details.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const STORAGE_KEY = 'studentFeeAppData';
+        let students = [];
+        let nextId = 1;
+        let selectedStudentId = null;
+
+        // DOM refs
+        const sName = document.getElementById('sName');
+        const sClass = document.getElementById('sClass');
+        const sFather = document.getElementById('sFather');
+        const sMother = document.getElementById('sMother');
+        const sDob = document.getElementById('sDob');
+        const sPhone = document.getElementById('sPhone');
+        const sAddress = document.getElementById('sAddress');
+        const addBtn = document.getElementById('addStudentBtn');
+        const classFilter = document.getElementById('classFilter');
+        const studentList = document.getElementById('studentList');
+        const detailContent = document.getElementById('detailContent');
+        const studentCount = document.getElementById('studentCount');
+
+        function saveToLocalStorage() {
+            try {
+                const data = { students: students, nextId: nextId };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) { console.error('Save error:', e); }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    students = data.students || [];
+                    nextId = data.nextId || 1;
+                    return true;
+                }
+            } catch (e) { console.error('Load error:', e); }
+            return false;
+        }
+
+        function createEmptyFeeRecords() {
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            return months.map(month => ({
+                month: month,
+                fee: '',
+                date: '',
+                status: 'unpaid',
+                teacherSign: '',
+                isLocked: false
+            }));
+        }
+
+        function addStudent() {
+            const name = sName.value.trim();
+            const cls = sClass.value;
+            const father = sFather.value.trim();
+            const mother = sMother.value.trim();
+            const dob = sDob.value;
+            const phone = sPhone.value.trim();
+            const address = sAddress.value.trim();
+
+            if (!name) {
+                alert('Please enter student name!');
+                sName.focus();
+                return;
+            }
+
+            const id = 'STU' + String(nextId++).padStart(3, '0');
+            const newStudent = {
+                id: id,
+                name: name,
+                class: parseInt(cls),
+                father: father || '—',
+                mother: mother || '—',
+                dob: dob || '—',
+                phone: phone || '—',
+                address: address || '—',
+                feeRecords: createEmptyFeeRecords()
+            };
+            students.push(newStudent);
+            
+            sName.value = '';
+            sFather.value = '';
+            sMother.value = '';
+            sDob.value = '';
+            sPhone.value = '';
+            sAddress.value = '';
+            sName.focus();
+
+            saveToLocalStorage();
+            renderStudentList();
+            
+            if (selectedStudentId) {
+                const found = students.find(s => s.id === selectedStudentId);
+                if (found) renderDetail(found);
+                else { selectedStudentId = null; showEmptyDetail(); }
+            }
+        }
+
+        function renderStudentList() {
+            const filterVal = classFilter.value;
+            let filtered = students;
+            if (filterVal !== 'all') {
+                const clsNum = parseInt(filterVal);
+                filtered = students.filter(s => s.class === clsNum);
+            }
+            filtered.sort((a,b) => a.name.localeCompare(b.name));
+            studentCount.textContent = `Total: ${filtered.length}`;
+
+            if (filtered.length === 0) {
+                studentList.innerHTML = `<div class="empty-list">${students.length === 0 ? 'No students. Add from above.' : 'No students in this class.'}</div>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((student, index) => {
+                const activeClass = (selectedStudentId === student.id) ? 'active' : '';
+                html += `
+                    <div class="student-item ${activeClass}" data-id="${student.id}">
+                        <span>${index+1}</span>
+                        <span class="sname">${student.name}</span>
+                        <span class="sclass">${student.class}</span>
+                        <span class="sid">${student.id}</span>
+                        <span>
+                            <i class="fas fa-trash-alt delete-icon" onclick="event.stopPropagation(); deleteStudent('${student.id}')" title="Delete"></i>
+                        </span>
+                    </div>
+                `;
+            });
+            studentList.innerHTML = html;
+
+            document.querySelectorAll('.student-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const student = students.find(s => s.id === id);
+                    if (student) {
+                        selectedStudentId = id;
+                        renderStudentList();
+                        renderDetail(student);
+                    }
+                });
+            });
+        }
+
+        window.deleteStudent = function(id) {
+            if (!confirm('Are you sure you want to delete this student?')) return;
+            students = students.filter(s => s.id !== id);
+            if (selectedStudentId === id) {
+                selectedStudentId = null;
+                showEmptyDetail();
+            }
+            saveToLocalStorage();
+            renderStudentList();
+        };
+
+        window.saveFeeRow = function(studentId, monthIndex, btnElement) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            const feeInput = document.getElementById(`fee_${studentId}_${monthIndex}`);
+            const dateInput = document.getElementById(`date_${studentId}_${monthIndex}`);
+            const statusSelect = document.getElementById(`status_${studentId}_${monthIndex}`);
+            const signInput = document.getElementById(`sign_${studentId}_${monthIndex}`);
+
+            if (feeInput && dateInput && statusSelect && signInput) {
+                student.feeRecords[monthIndex].fee = feeInput.value;
+                student.feeRecords[monthIndex].date = dateInput.value;
+                student.feeRecords[monthIndex].status = statusSelect.value;
+                student.feeRecords[monthIndex].teacherSign = signInput.value || '—';
+                student.feeRecords[monthIndex].isLocked = true;
+            }
+
+            saveToLocalStorage();
+
+            if (btnElement) {
+                btnElement.innerHTML = '✅ Saved';
+                btnElement.style.background = '#1f7a4a';
+                btnElement.disabled = true;
+            }
+
+            renderDetail(student);
+        };
+
+        window.editFeeRow = function(studentId, monthIndex) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            student.feeRecords[monthIndex].isLocked = false;
+            renderDetail(student);
+        };
+
+        // ===== PRINT FUNCTION =====
+        window.printStudentDetail = function() {
+            if (!selectedStudentId) {
+                alert('Please select a student first!');
+                return;
+            }
+            const student = students.find(s => s.id === selectedStudentId);
+            if (!student) {
+                alert('Student not found!');
+                return;
+            }
+            window.print();
+        };
+
+        function renderDetail(student) {
+            if (!student) return;
+
+            const records = student.feeRecords;
+            let tableRows = '';
+            records.forEach((rec, idx) => {
+                const isLocked = rec.isLocked || false;
+                const statusText = rec.status === 'paid' ? '✅ Paid' : '❌ Pending';
+                const statusClass = rec.status === 'paid' ? 'status-paid' : 'status-unpaid';
+                
+                let feeDisplay, dateDisplay, statusDisplay, signDisplay;
+                if (isLocked) {
+                    feeDisplay = `<span style="font-weight:600;color:#1a3a55;">₹${rec.fee || '—'}</span>`;
+                    dateDisplay = `<span style="color:#1a3a55;">${rec.date || '—'}</span>`;
+                    statusDisplay = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+                    signDisplay = `<span style="font-style:italic;color:#3f5d7a;">${rec.teacherSign || '—'}</span>`;
+                } else {
+                    feeDisplay = `<input type="number" class="fee-input" id="fee_${student.id}_${idx}" value="${rec.fee}" placeholder="₹" />`;
+                    dateDisplay = `<input type="date" class="date-input" id="date_${student.id}_${idx}" value="${rec.date}" />`;
+                    statusDisplay = `
+                        <select class="status-select" id="status_${student.id}_${idx}">
+                            <option value="unpaid" ${rec.status === 'unpaid' ? 'selected' : ''}>❌ Pending</option>
+                            <option value="paid" ${rec.status === 'paid' ? 'selected' : ''}>✅ Paid</option>
+                        </select>
+                    `;
+                    signDisplay = `<input type="text" class="sign-input" id="sign_${student.id}_${idx}" value="${rec.teacherSign !== '—' ? rec.teacherSign : ''}" placeholder="Signature" />`;
+                }
+
+                let actionButtons = '';
+                if (isLocked) {
+                    actionButtons = `
+                        <button class="btn-sm btn-sm-warning" onclick="editFeeRow('${student.id}', ${idx})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <span class="lock-icon"><i class="fas fa-lock"></i></span>
+                    `;
+                } else {
+                    actionButtons = `
+                        <button class="btn-sm btn-sm-success" id="saveBtn_${student.id}_${idx}"
+                                onclick="saveFeeRow('${student.id}', ${idx}, this)">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    `;
+                }
+
+                tableRows += `
+                    <tr>
+                        <td><strong>${rec.month}</strong></td>
+                        <td>${feeDisplay}</td>
+                        <td>${dateDisplay}</td>
+                        <td>${statusDisplay}</td>
+                        <td>${signDisplay}</td>
+                        <td><div class="action-cell">${actionButtons}</div></td>
+                    </tr>
+                `;
+            });
+
+            detailContent.innerHTML = `
+                <!-- Print Header (visible only in print) -->
+                <div class="print-header">
+                    <h2>🏫 Student Fee Report</h2>
+                    <p>${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                </div>
+
+                <div class="detail-header">
+                    <h2><i class="fas fa-user-circle"></i> ${student.name}</h2>
+                    <span class="badge"><i class="fas fa-id-card"></i> ${student.id}</span>
+                </div>
+                <div class="detail-info-grid">
+                    <span><i class="fas fa-chalkboard"></i> Class: ${student.class}</span>
+                    <span><i class="fas fa-user-father"></i> Father: ${student.father}</span>
+                    <span><i class="fas fa-user-mother"></i> Mother: ${student.mother}</span>
+                    <span><i class="fas fa-calendar-alt"></i> DOB: ${student.dob}</span>
+                    <span><i class="fas fa-phone"></i> ${student.phone}</span>
+                    <span><i class="fas fa-home"></i> ${student.address}</span>
+                </div>
+                <h3 style="margin:12px 0 10px; color:#1a3853; font-size:0.9rem;">
+                    <i class="fas fa-money-bill-wave"></i> Monthly Fees (January - December)
+                    <span style="font-size:0.6rem;font-weight:400;color:#4a6a8a;margin-left:6px;">
+                        <span style="color:#1f7a4a;">✅</span> Locked after Save
+                    </span>
+                </h3>
+                <div class="fee-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Fee</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Signature</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                </div>
+
+                <!-- Print Button -->
+                <div class="print-btn-container">
+                    <button class="btn-primary btn-print" onclick="printStudentDetail()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+
+                <!-- Print Footer (visible only in print) -->
+                <div class="print-footer">
+                    <p>This report was generated on ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    <p>© Student Fee Management System</p>
+                </div>
+
+                <div class="footer-note">
+                    <i class="fas fa-lock"></i> Locked = Saved &nbsp;|&nbsp;
+                    <i class="fas fa-edit" style="color:#d4a017;"></i> Edit = Unlock &nbsp;|&nbsp;
+                    <i class="fas fa-print" style="color:#d4a017;"></i> Print = Print full details
+                </div>
+            `;
+        }
+
+        function showEmptyDetail() {
+            detailContent.innerHTML = `
+                <div class="empty-detail">
+                    <i class="fas fa-hand-pointer"></i>
+                    Click on a student <br /> to enter fee details.
+                </div>
+            `;
+        }
+
+        function init() {
+            const hasSavedData = loadFromLocalStorage();
+            if (!hasSavedData) {
+                students = [];
+                nextId = 1;
+            }
+
+            renderStudentList();
+            
+            if (students.length > 0 && selectedStudentId) {
+                const found = students.find(s => s.id === selectedStudentId);
+                if (found) renderDetail(found);
+                else showEmptyDetail();
+            } else {
+                showEmptyDetail();
+            }
+
+            addBtn.addEventListener('click', addStudent);
+            sName.addEventListener('keydown', (e) => { if (e.key === 'Enter') addStudent(); });
+
+            classFilter.addEventListener('change', () => {
+                renderStudentList();
+                if (selectedStudentId) {
+                    const found = students.find(s => s.id === selectedStudentId);
+                    if (!found) {
+                        selectedStudentId = null;
+                        showEmptyDetail();
+                    } else {
+                        const filterVal = classFilter.value;
+                        if (filterVal !== 'all' && parseInt(filterVal) !== found.class) {
+                            selectedStudentId = null;
+                            showEmptyDetail();
+                        } else {
+                            renderDetail(found);
+                        }
+                    }
+                }
+            });
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
