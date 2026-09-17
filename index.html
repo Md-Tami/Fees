@@ -143,7 +143,7 @@
             background: white;
             font-weight: 500;
             flex: 1;
-            min-width: 100px;
+            min-width: 80px;
             -webkit-appearance: none;
             appearance: none;
         }
@@ -292,6 +292,46 @@
             margin-right: 4px;
             color: #3d6a9b;
             width: 16px;
+        }
+
+        /* YEAR SELECTOR (detail panel) */
+        .year-selector-wrap {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .year-selector-wrap label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #1f3a57;
+        }
+        .year-selector-wrap select {
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1.5px solid #cbd8e8;
+            font-size: 0.85rem;
+            background: white;
+            font-weight: 600;
+            color: #1f3a57;
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            min-width: 100px;
+        }
+        .year-selector-wrap select:focus {
+            border-color: #2a5a7a;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42,90,122,0.12);
+        }
+        .year-badge {
+            background: #2a5a7a;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
 
         /* FEE TABLE - MOBILE */
@@ -466,12 +506,22 @@
             .btn-print,
             .btn-sm,
             .delete-icon,
-            .action-cell .btn-sm-warning,
-            .action-cell .btn-sm-success,
-            .action-cell .lock-icon,
+            .action-cell,
             #addStudentBtn,
-            .footer-note {
+            .footer-note,
+            .year-selector-wrap label,
+            .year-selector-wrap select {
                 display: none !important;
+            }
+            .year-badge {
+                display: inline-block !important;
+                background: #1a2e44 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                padding: 3px 12px !important;
+                border-radius: 30px !important;
+                font-size: 0.8rem !important;
             }
             .detail-panel {
                 border: none !important;
@@ -532,9 +582,6 @@
             .fee-table-wrap th {
                 padding: 6px 8px !important;
             }
-            .action-cell {
-                display: none !important;
-            }
             .detail-header h2 {
                 font-size: 1.4rem !important;
             }
@@ -568,7 +615,6 @@
             }
         }
 
-        /* Print header/footer - hidden by default, shown only in print */
         .print-header, .print-footer {
             display: none;
         }
@@ -638,27 +684,17 @@
                     <option value="8">8</option>
                     <option value="9">9</option>
                     <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
                 </select>
             </div>
             <div class="form-group">
                 <label><i class="fas fa-user-father"></i> Father</label>
                 <input type="text" id="sFather" placeholder="Father's Name" />
             </div>
-            <div class="form-group">
-                <label><i class="fas fa-user-mother"></i> Mother</label>
-                <input type="text" id="sMother" placeholder="Mother's Name" />
-            </div>
-            <div class="form-group">
-                <label><i class="fas fa-calendar-alt"></i> DOB</label>
-                <input type="date" id="sDob" />
-            </div>
-            <div class="form-group">
+            <div class="form-group full-width">
                 <label><i class="fas fa-phone"></i> Mobile</label>
                 <input type="text" id="sPhone" placeholder="9876543210" />
-            </div>
-            <div class="form-group full-width">
-                <label><i class="fas fa-home"></i> Address</label>
-                <input type="text" id="sAddress" placeholder="Full Address" />
             </div>
             <div class="form-group full-width">
                 <button class="btn-primary" id="addStudentBtn"><i class="fas fa-save"></i> Add Student</button>
@@ -666,8 +702,10 @@
         </div>
     </div>
 
-    <!-- FILTER -->
+    <!-- FILTER (Year on left of Class) -->
     <div class="class-filter">
+        <label><i class="fas fa-calendar"></i> Year:</label>
+        <select id="yearFilter"></select>
         <label><i class="fas fa-filter"></i> Class:</label>
         <select id="classFilter">
             <option value="all">All</option>
@@ -676,6 +714,8 @@
             <option value="8">8</option>
             <option value="9">9</option>
             <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
         </select>
         <span id="studentCount">Total: 0</span>
     </div>
@@ -687,7 +727,7 @@
             <span>Name</span>
             <span>Class</span>
             <span>ID</span>
-            <span> </span>
+            <span> </span>
         </div>
         <div class="student-list" id="studentList">
             <div class="empty-list">No students. Add from above.</div>
@@ -707,24 +747,43 @@
 
 <script>
     (function() {
-        const STORAGE_KEY = 'studentFeeAppData';
+        const STORAGE_KEY = 'studentFeeAppDataV4';
         let students = [];
         let nextId = 1;
         let selectedStudentId = null;
+        let selectedYear = new Date().getFullYear();
 
         // DOM refs
         const sName = document.getElementById('sName');
         const sClass = document.getElementById('sClass');
         const sFather = document.getElementById('sFather');
-        const sMother = document.getElementById('sMother');
-        const sDob = document.getElementById('sDob');
         const sPhone = document.getElementById('sPhone');
-        const sAddress = document.getElementById('sAddress');
         const addBtn = document.getElementById('addStudentBtn');
         const classFilter = document.getElementById('classFilter');
+        const yearFilter = document.getElementById('yearFilter');
         const studentList = document.getElementById('studentList');
         const detailContent = document.getElementById('detailContent');
         const studentCount = document.getElementById('studentCount');
+
+        const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+        function getYearList() {
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+                years.push(y);
+            }
+            return years;
+        }
+
+        function populateYearDropdowns() {
+            const years = getYearList();
+            let html = '';
+            years.forEach(y => {
+                html += `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}</option>`;
+            });
+            yearFilter.innerHTML = html;
+        }
 
         function saveToLocalStorage() {
             try {
@@ -740,6 +799,14 @@
                     const data = JSON.parse(saved);
                     students = data.students || [];
                     nextId = data.nextId || 1;
+                    students.forEach(s => {
+                        if (!s.yearRecords) {
+                            const yr = new Date().getFullYear();
+                            s.yearRecords = {};
+                            s.yearRecords[yr] = s.feeRecords || createEmptyFeeRecords();
+                            delete s.feeRecords;
+                        }
+                    });
                     return true;
                 }
             } catch (e) { console.error('Load error:', e); }
@@ -747,8 +814,7 @@
         }
 
         function createEmptyFeeRecords() {
-            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-            return months.map(month => ({
+            return MONTHS.map(month => ({
                 month: month,
                 fee: '',
                 date: '',
@@ -758,14 +824,19 @@
             }));
         }
 
+        function getYearRecords(student, year) {
+            if (!student.yearRecords) student.yearRecords = {};
+            if (!student.yearRecords[year]) {
+                student.yearRecords[year] = createEmptyFeeRecords();
+            }
+            return student.yearRecords[year];
+        }
+
         function addStudent() {
             const name = sName.value.trim();
             const cls = sClass.value;
             const father = sFather.value.trim();
-            const mother = sMother.value.trim();
-            const dob = sDob.value;
             const phone = sPhone.value.trim();
-            const address = sAddress.value.trim();
 
             if (!name) {
                 alert('Please enter student name!');
@@ -779,25 +850,21 @@
                 name: name,
                 class: parseInt(cls),
                 father: father || '—',
-                mother: mother || '—',
-                dob: dob || '—',
                 phone: phone || '—',
-                address: address || '—',
-                feeRecords: createEmptyFeeRecords()
+                yearRecords: {}
             };
+            // Create empty records for the currently selected year in the filter
+            newStudent.yearRecords[selectedYear] = createEmptyFeeRecords();
             students.push(newStudent);
-            
+
             sName.value = '';
             sFather.value = '';
-            sMother.value = '';
-            sDob.value = '';
             sPhone.value = '';
-            sAddress.value = '';
             sName.focus();
 
             saveToLocalStorage();
             renderStudentList();
-            
+
             if (selectedStudentId) {
                 const found = students.find(s => s.id === selectedStudentId);
                 if (found) renderDetail(found);
@@ -861,21 +928,32 @@
             renderStudentList();
         };
 
-        window.saveFeeRow = function(studentId, monthIndex, btnElement) {
+        window.changeYear = function(year) {
+            selectedYear = parseInt(year);
+            // Keep the filter dropdown in sync
+            yearFilter.value = selectedYear;
+            if (selectedStudentId) {
+                const student = students.find(s => s.id === selectedStudentId);
+                if (student) renderDetail(student);
+            }
+        };
+
+        window.saveFeeRow = function(studentId, year, monthIndex, btnElement) {
             const student = students.find(s => s.id === studentId);
             if (!student) return;
+            const records = getYearRecords(student, year);
 
-            const feeInput = document.getElementById(`fee_${studentId}_${monthIndex}`);
-            const dateInput = document.getElementById(`date_${studentId}_${monthIndex}`);
-            const statusSelect = document.getElementById(`status_${studentId}_${monthIndex}`);
-            const signInput = document.getElementById(`sign_${studentId}_${monthIndex}`);
+            const feeInput = document.getElementById(`fee_${studentId}_${year}_${monthIndex}`);
+            const dateInput = document.getElementById(`date_${studentId}_${year}_${monthIndex}`);
+            const statusSelect = document.getElementById(`status_${studentId}_${year}_${monthIndex}`);
+            const signInput = document.getElementById(`sign_${studentId}_${year}_${monthIndex}`);
 
             if (feeInput && dateInput && statusSelect && signInput) {
-                student.feeRecords[monthIndex].fee = feeInput.value;
-                student.feeRecords[monthIndex].date = dateInput.value;
-                student.feeRecords[monthIndex].status = statusSelect.value;
-                student.feeRecords[monthIndex].teacherSign = signInput.value || '—';
-                student.feeRecords[monthIndex].isLocked = true;
+                records[monthIndex].fee = feeInput.value;
+                records[monthIndex].date = dateInput.value;
+                records[monthIndex].status = statusSelect.value;
+                records[monthIndex].teacherSign = signInput.value || '—';
+                records[monthIndex].isLocked = true;
             }
 
             saveToLocalStorage();
@@ -889,14 +967,14 @@
             renderDetail(student);
         };
 
-        window.editFeeRow = function(studentId, monthIndex) {
+        window.editFeeRow = function(studentId, year, monthIndex) {
             const student = students.find(s => s.id === studentId);
             if (!student) return;
-            student.feeRecords[monthIndex].isLocked = false;
+            const records = getYearRecords(student, year);
+            records[monthIndex].isLocked = false;
             renderDetail(student);
         };
 
-        // ===== PRINT FUNCTION =====
         window.printStudentDetail = function() {
             if (!selectedStudentId) {
                 alert('Please select a student first!');
@@ -913,13 +991,20 @@
         function renderDetail(student) {
             if (!student) return;
 
-            const records = student.feeRecords;
+            const records = getYearRecords(student, selectedYear);
+            const yearList = getYearList();
+
+            let yearOptions = '';
+            yearList.forEach(y => {
+                yearOptions += `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}</option>`;
+            });
+
             let tableRows = '';
             records.forEach((rec, idx) => {
                 const isLocked = rec.isLocked || false;
                 const statusText = rec.status === 'paid' ? '✅ Paid' : '❌ Pending';
                 const statusClass = rec.status === 'paid' ? 'status-paid' : 'status-unpaid';
-                
+
                 let feeDisplay, dateDisplay, statusDisplay, signDisplay;
                 if (isLocked) {
                     feeDisplay = `<span style="font-weight:600;color:#1a3a55;">₹${rec.fee || '—'}</span>`;
@@ -927,29 +1012,29 @@
                     statusDisplay = `<span class="status-badge ${statusClass}">${statusText}</span>`;
                     signDisplay = `<span style="font-style:italic;color:#3f5d7a;">${rec.teacherSign || '—'}</span>`;
                 } else {
-                    feeDisplay = `<input type="number" class="fee-input" id="fee_${student.id}_${idx}" value="${rec.fee}" placeholder="₹" />`;
-                    dateDisplay = `<input type="date" class="date-input" id="date_${student.id}_${idx}" value="${rec.date}" />`;
+                    feeDisplay = `<input type="number" class="fee-input" id="fee_${student.id}_${selectedYear}_${idx}" value="${rec.fee}" placeholder="₹" />`;
+                    dateDisplay = `<input type="date" class="date-input" id="date_${student.id}_${selectedYear}_${idx}" value="${rec.date}" />`;
                     statusDisplay = `
-                        <select class="status-select" id="status_${student.id}_${idx}">
+                        <select class="status-select" id="status_${student.id}_${selectedYear}_${idx}">
                             <option value="unpaid" ${rec.status === 'unpaid' ? 'selected' : ''}>❌ Pending</option>
                             <option value="paid" ${rec.status === 'paid' ? 'selected' : ''}>✅ Paid</option>
                         </select>
                     `;
-                    signDisplay = `<input type="text" class="sign-input" id="sign_${student.id}_${idx}" value="${rec.teacherSign !== '—' ? rec.teacherSign : ''}" placeholder="Signature" />`;
+                    signDisplay = `<input type="text" class="sign-input" id="sign_${student.id}_${selectedYear}_${idx}" value="${rec.teacherSign !== '—' ? rec.teacherSign : ''}" placeholder="Signature" />`;
                 }
 
                 let actionButtons = '';
                 if (isLocked) {
                     actionButtons = `
-                        <button class="btn-sm btn-sm-warning" onclick="editFeeRow('${student.id}', ${idx})">
+                        <button class="btn-sm btn-sm-warning" onclick="editFeeRow('${student.id}', ${selectedYear}, ${idx})">
                             <i class="fas fa-edit"></i> Edit
                         </button>
                         <span class="lock-icon"><i class="fas fa-lock"></i></span>
                     `;
                 } else {
                     actionButtons = `
-                        <button class="btn-sm btn-sm-success" id="saveBtn_${student.id}_${idx}"
-                                onclick="saveFeeRow('${student.id}', ${idx}, this)">
+                        <button class="btn-sm btn-sm-success" id="saveBtn_${student.id}_${selectedYear}_${idx}"
+                                onclick="saveFeeRow('${student.id}', ${selectedYear}, ${idx}, this)">
                             <i class="fas fa-save"></i> Save
                         </button>
                     `;
@@ -968,7 +1053,6 @@
             });
 
             detailContent.innerHTML = `
-                <!-- Print Header (visible only in print) -->
                 <div class="print-header">
                     <h2>🏫 Student Fee Report</h2>
                     <p>${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
@@ -981,13 +1065,19 @@
                 <div class="detail-info-grid">
                     <span><i class="fas fa-chalkboard"></i> Class: ${student.class}</span>
                     <span><i class="fas fa-user-father"></i> Father: ${student.father}</span>
-                    <span><i class="fas fa-user-mother"></i> Mother: ${student.mother}</span>
-                    <span><i class="fas fa-calendar-alt"></i> DOB: ${student.dob}</span>
                     <span><i class="fas fa-phone"></i> ${student.phone}</span>
-                    <span><i class="fas fa-home"></i> ${student.address}</span>
                 </div>
+
+                <div class="year-selector-wrap">
+                    <label><i class="fas fa-calendar"></i> Year:</label>
+                    <select id="yearSelect" onchange="changeYear(this.value)">
+                        ${yearOptions}
+                    </select>
+                    <span class="year-badge">${selectedYear} Records</span>
+                </div>
+
                 <h3 style="margin:12px 0 10px; color:#1a3853; font-size:0.9rem;">
-                    <i class="fas fa-money-bill-wave"></i> Monthly Fees (January - December)
+                    <i class="fas fa-money-bill-wave"></i> Monthly Fees (January - December) — ${selectedYear}
                     <span style="font-size:0.6rem;font-weight:400;color:#4a6a8a;margin-left:6px;">
                         <span style="color:#1f7a4a;">✅</span> Locked after Save
                     </span>
@@ -1008,14 +1098,12 @@
                     </table>
                 </div>
 
-                <!-- Print Button -->
                 <div class="print-btn-container">
                     <button class="btn-primary btn-print" onclick="printStudentDetail()">
                         <i class="fas fa-print"></i> Print
                     </button>
                 </div>
 
-                <!-- Print Footer (visible only in print) -->
                 <div class="print-footer">
                     <p>This report was generated on ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                     <p>© Student Fee Management System</p>
@@ -1045,8 +1133,9 @@
                 nextId = 1;
             }
 
+            populateYearDropdowns();
             renderStudentList();
-            
+
             if (students.length > 0 && selectedStudentId) {
                 const found = students.find(s => s.id === selectedStudentId);
                 if (found) renderDetail(found);
@@ -1057,6 +1146,15 @@
 
             addBtn.addEventListener('click', addStudent);
             sName.addEventListener('keydown', (e) => { if (e.key === 'Enter') addStudent(); });
+
+            // Year filter change
+            yearFilter.addEventListener('change', () => {
+                selectedYear = parseInt(yearFilter.value);
+                if (selectedStudentId) {
+                    const found = students.find(s => s.id === selectedStudentId);
+                    if (found) renderDetail(found);
+                }
+            });
 
             classFilter.addEventListener('change', () => {
                 renderStudentList();
